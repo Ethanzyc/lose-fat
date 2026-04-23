@@ -1,0 +1,5 @@
+# User profiles contain personal health data
+profiles/*.json
+
+# Generated output files
+output/*.md
