@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>减脂方案报告</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#1a1a1a;line-height:1.6}
+.container{max-width:800px;margin:0 auto;padding:16px}
+header{background:linear-gradient(135deg,#2c3e50,#3498db);color:#fff;padding:32px 24px;border-radius:16px;margin-bottom:20px;text-align:center}
+header h1{font-size:22px;font-weight:600}
+header .sub{opacity:.85;margin-top:6px;font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+@media(min-width:600px){.cards{grid-template-columns:repeat(4,1fr)}}
+.card{background:#fff;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.card .label{font-size:12px;color:#888;margin-bottom:4px}
+.card .value{font-size:24px;font-weight:700;line-height:1.2}
+.card .meta{font-size:12px;color:#666;margin-top:4px}
+.green{color:#2ecc71}.amber{color:#e67e22}.red{color:#e74c3c}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}
+.badge-g{background:#e8f8f0;color:#27ae60}
+.badge-a{background:#fef5e7;color:#e67e22}
+.badge-r{background:#fdedec;color:#c0392b}
+.section{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:16px}
+.section h2{font-size:17px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #f0f2f5}
+.chart-box{height:260px;position:relative}
+@media(max-width:600px){.chart-box{height:220px}}
+.empty{text-align:center;color:#aaa;padding:24px 0;font-size:14px}
+.md h3{font-size:16px;margin:14px 0 6px;color:#2c3e50}
+.md p{margin:8px 0}.md ul,.md ol{padding-left:20px;margin:6px 0}
+.md li{margin:3px 0}
+.md table{width:100%;border-collapse:collapse;margin:10px 0;font-size:14px}
+.md th,.md td{border:1px solid #e8e8e8;padding:6px 10px}
+.md th{background:#f8f9fa;font-weight:500}
+.md blockquote{border-left:4px solid #e74c3c;padding:10px 14px;background:#fef5f5;border-radius:0 8px 8px 0;margin:12px 0;font-size:13px;color:#555}
+.disclaimer{text-align:center;color:#aaa;font-size:12px;padding:16px 0}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>减脂方案报告</h1>
+    <div class="sub" id="headerSub"></div>
+  </header>
+  <div class="cards" id="cards"></div>
+  <div id="charts"></div>
+  <div class="section" id="assessSec"><h2>健康评估</h2><div class="md" id="assessMd"></div></div>
+  <div class="section" id="planSec"><h2>4 周减脂计划</h2><div class="md" id="planMd"></div></div>
+  <div class="disclaimer">⚠️ 免责声明：本方案基于公开医学指南生成，仅供参考，不构成医疗建议。请在医生指导下进行健康管理，如有不适请及时就医。</div>
+</div>
+<script>
+const D=__DATA__;
+
+/* Header */
+document.getElementById('headerSub').textContent=D.userName+' · '+D.reportDate;
+document.title='减脂方案报告 - '+D.userName;
+
+/* Cards */
+(function(){
+  var p=D.profile,h=p.health_data;
+  function bs(v){return v<18.5?['偏瘦','green','badge-g']:v<24?['正常','green','badge-g']:v<28?['超重','amber','badge-a']:['肥胖','red','badge-r']}
+  function ts(v){return v<1.7?['正常','green','badge-g']:v<2.3?['边缘升高','amber','badge-a']:['升高','red','badge-r']}
+  var b=bs(p.bmi),t=ts(h.tg_mmol);
+  var wh=p.weight_history||[],startW=wh.length?wh[0].weight_kg:p.weight_kg;
+  var diff=p.weight_kg-startW;
+  var dt=diff?((diff<0?'↓ ':'↑ ')+Math.abs(diff).toFixed(1)+' kg'):'起始体重';
+  document.getElementById('cards').innerHTML=
+    '<div class="card"><div class="label">BMI</div><div class="value '+b[1]+'">'+p.bmi.toFixed(1)+'</div><div class="meta"><span class="badge '+b[2]+'">'+b[0]+'</span></div></div>'+
+    '<div class="card"><div class="label">甘油三酯</div><div class="value '+t[1]+'">'+h.tg_mmol+'</div><div class="meta">mmol/L · <span class="badge '+t[2]+'">'+t[0]+'</span></div></div>'+
+    '<div class="card"><div class="label">当前体重</div><div class="value">'+p.weight_kg+' kg</div><div class="meta">'+(p.target_weight_kg?'目标 '+p.target_weight_kg+' kg':'')+'</div></div>'+
+    '<div class="card"><div class="label">体重变化</div><div class="value '+(diff<0?'green':diff>0?'red':'')+'">'+dt+'</div><div class="meta">较起始 '+startW+' kg</div></div>';
+})();
+
+/* Charts */
+(function(){
+  var area=document.getElementById('charts');
+  var wh=D.profile.weight_history||[];
+  var ch=D.profile.checkup_history||[];
+
+  if(wh.length>=2){
+    var sec=document.createElement('div');sec.className='section';
+    sec.innerHTML='<h2>体重趋势</h2><div class="chart-box"><canvas id="wC"></canvas></div>';
+    area.appendChild(sec);
+    var ds=[{label:'体重 (kg)',data:wh.map(function(w){return w.weight_kg}),borderColor:'#3498db',backgroundColor:'rgba(52,152,219,.08)',fill:true,tension:.3,pointRadius:5,pointBackgroundColor:'#fff',pointBorderColor:'#3498db',pointBorderWidth:2}];
+    if(D.profile.target_weight_kg){ds.push({label:'目标',data:wh.map(function(){return D.profile.target_weight_kg}),borderColor:'#2ecc71',borderDash:[6,4],pointRadius:0,fill:false,borderWidth:1.5})}
+    new Chart(document.getElementById('wC'),{type:'line',data:{labels:wh.map(function(w){return w.date}),datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true}}},scales:{y:{beginAtZero:false}}}});
+  }
+
+  var tg=ch.filter(function(r){return r.tg_mmol!=null});
+  if(tg.length>=2){
+    var sec2=document.createElement('div');sec2.className='section';
+    sec2.innerHTML='<h2>甘油三酯趋势</h2><div class="chart-box"><canvas id="tgC"></canvas></div>';
+    area.appendChild(sec2);
+    new Chart(document.getElementById('tgC'),{type:'line',data:{labels:tg.map(function(r){return r.date}),datasets:[{label:'甘油三酯 (mmol/L)',data:tg.map(function(r){return r.tg_mmol}),borderColor:'#e74c3c',backgroundColor:'rgba(231,76,60,.08)',fill:true,tension:.3,pointRadius:5,pointBackgroundColor:'#fff',pointBorderColor:'#e74c3c',pointBorderWidth:2},{label:'正常上限 (1.7)',data:tg.map(function(){return 1.7}),borderColor:'#2ecc71',borderDash:[6,4],pointRadius:0,fill:false,borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true}}},scales:{y:{beginAtZero:false}}}});
+  }
+})();
+
+/* Markdown content */
+if(D.assessment){document.getElementById('assessMd').innerHTML=marked.parse(D.assessment)}
+else{document.getElementById('assessSec').style.display='none'}
+if(D.plan){document.getElementById('planMd').innerHTML=marked.parse(D.plan)}
+else{document.getElementById('planSec').style.display='none'}
+</script>
+</body>
+</html>
