@@ -1,5 +1,2 @@
-# User profiles contain personal health data
-profiles/*.json
-
-# Generated output files
-output/*.md
+# User data directory (profiles, output, etc.)
+.lose-fat/

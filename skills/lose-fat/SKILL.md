@@ -20,22 +20,20 @@ triggers:
 
 ## 路径配置
 
-本 skill 的数据根目录为 `/Users/zhuyuchen/ai/lose-fat`，所有文件路径均基于此目录：
-
-- **知识文件目录**：`/Users/zhuyuchen/ai/lose-fat/skills/lose-fat/knowledge/`
-- **用户档案目录**：`/Users/zhuyuchen/ai/lose-fat/profiles/`
-- **导出文件目录**：`/Users/zhuyuchen/ai/lose-fat/output/`
+- **知识文件**：相对于本 SKILL.md 所在目录，使用 `knowledge/` 相对路径引用
+- **用户档案目录**：基于当前工作目录的 `.lose-fat/profiles/`，首次使用时自动创建
+- **导出文件目录**：基于当前工作目录的 `.lose-fat/output/`，首次使用时自动创建
 
 ## 知识文件
 
 在执行以下流程前，先读取以下知识文件作为专业依据：
 
-- `/Users/zhuyuchen/ai/lose-fat/skills/lose-fat/knowledge/triglycerides.md` — 甘油三酯参考范围、分级、饮食建议
-- `/Users/zhuyuchen/ai/lose-fat/skills/lose-fat/knowledge/fatty-liver.md` — 脂肪肝分度、逆转策略、运动禁忌
-- `/Users/zhuyuchen/ai/lose-fat/skills/lose-fat/knowledge/nutrition-guide.md` — TDEE 计算、营养素分配、渗透压知识
-- `/Users/zhuyuchen/ai/lose-fat/skills/lose-fat/knowledge/exercise-guide.md` — 运动方案、超重人群过渡路径、强度判断
-- `/Users/zhuyuchen/ai/lose-fat/skills/lose-fat/knowledge/lifestyle.md` — 睡眠、饮酒、压力管理
-- `/Users/zhuyuchen/ai/lose-fat/skills/lose-fat/knowledge/food-scoring.md` — 食物评分表、评分方法、搭配示例
+- `knowledge/triglycerides.md` — 甘油三酯参考范围、分级、饮食建议
+- `knowledge/fatty-liver.md` — 脂肪肝分度、逆转策略、运动禁忌
+- `knowledge/nutrition-guide.md` — TDEE 计算、营养素分配、渗透压知识
+- `knowledge/exercise-guide.md` — 运动方案、超重人群过渡路径、强度判断
+- `knowledge/lifestyle.md` — 睡眠、饮酒、压力管理
+- `knowledge/food-scoring.md` — 食物评分表、评分方法、搭配示例
 
 根据用户当前所处的阶段，选择性读取相关知识文件，不需要一次全部读取。
 
@@ -43,7 +41,10 @@ triggers:
 
 ### 第一步：用户识别
 
-1. 使用 Bash 工具扫描用户档案目录：`ls /Users/zhuyuchen/ai/lose-fat/profiles/*.json 2>/dev/null`
+1. 使用 Bash 工具确保目录存在并扫描用户档案：
+   ```
+   mkdir -p .lose-fat/profiles .lose-fat/output && ls .lose-fat/profiles/*.json 2>/dev/null
+   ```
 2. 根据结果进入对应分支：
 
 **无档案文件时：**
@@ -108,7 +109,7 @@ triggers:
 
 收集完成后：
 1. 计算 BMI = 体重(kg) / (身高(m))²
-2. 将所有数据保存为 JSON 文件到 `/Users/zhuyuchen/ai/lose-fat/profiles/{name_pinyin}_{date}.json`
+2. 将所有数据保存为 JSON 文件到 `.lose-fat/profiles/{name_pinyin}_{date}.json`
 3. 进入「运动偏好与目标收集」
 
 ### 第三步：运动偏好与目标收集
@@ -160,7 +161,7 @@ triggers:
 
 ### 第五步：健康评估
 
-读取 `/Users/zhuyuchen/ai/lose-fat/skills/lose-fat/knowledge/triglycerides.md` 和 `/Users/zhuyuchen/ai/lose-fat/skills/lose-fat/knowledge/fatty-liver.md`。
+读取 `knowledge/triglycerides.md` 和 `knowledge/fatty-liver.md`。
 
 基于用户数据输出：
 
@@ -201,7 +202,7 @@ BMI 分级标准（中国）：
 
 ### 第六步：4 周减脂计划生成
 
-读取 `/Users/zhuyuchen/ai/lose-fat/skills/lose-fat/knowledge/nutrition-guide.md`、`/Users/zhuyuchen/ai/lose-fat/skills/lose-fat/knowledge/exercise-guide.md`、`/Users/zhuyuchen/ai/lose-fat/skills/lose-fat/knowledge/food-scoring.md` 和 `/Users/zhuyuchen/ai/lose-fat/skills/lose-fat/knowledge/lifestyle.md`。
+读取 `knowledge/nutrition-guide.md`、`knowledge/exercise-guide.md`、`knowledge/food-scoring.md` 和 `knowledge/lifestyle.md`。
 
 首先计算用户的：
 - BMR（使用 Mifflin-St Jeor 公式）
@@ -270,7 +271,7 @@ BMI 分级标准（中国）：
 1. 在对话中已经展示了完整的健康评估和 4 周计划
 2. 询问用户：「是否需要将此方案导出为文件？导出后将保存为 markdown 文件。」
 3. 如果用户选择导出：
-   - 将完整的评估和计划内容写入 `/Users/zhuyuchen/ai/lose-fat/output/{用户名}_{日期}_减脂方案.md`
+   - 将完整的评估和计划内容写入 `.lose-fat/output/{用户名}_{日期}_减脂方案.md`
    - 告知用户文件路径
 
 ### 第八步：进度回访
