@@ -35,8 +35,26 @@ triggers:
 - `knowledge/exercise-guide.md` — 运动方案、超重人群过渡路径、强度判断
 - `knowledge/lifestyle.md` — 睡眠、饮酒、压力管理
 - `knowledge/food-scoring.md` — 食物评分表、评分方法、搭配示例
+- `knowledge/metabolic-syndrome.md` — 代谢综合征诊断标准、组分联动、综合干预
+- `knowledge/eating-out.md` — 外食外卖策略、常见菜品热量估算、点餐技巧
+- `knowledge/behavioral-support.md` — 暴食循环、动机管理、习惯养成、社交应对
+- `knowledge/blood-sugar.md` — 血糖参考范围、糖尿病前期、果糖风险、血糖-TG 关系
+- `knowledge/supplements.md` — Omega-3、奶蓟草、小檗碱等补充剂循证分析
+- `knowledge/plateau.md` — 平台期识别、成因分析、突破策略
+- `knowledge/body-composition.md` — 腰围、体脂率、腰臀比标准与跟踪方法
+- `knowledge/cooking-guide.md` — 中式低油烹饪技法、调味替代、备菜技巧
 
 根据用户当前所处的阶段，选择性读取相关知识文件，不需要一次全部读取。
+
+### 按需搜索
+
+当遇到以下情况时，使用 WebSearch 工具搜索最新资料补充知识库：
+
+- 用户提问涉及的知识不在现有知识文件中
+- 需要核实最新的医学指南或推荐值
+- 遇到罕见情况或知识库未覆盖的病况
+
+搜索后，将可靠的新信息整合到回答中，并在回答末尾附上来源链接。
 
 ## 全局规则：体重自动记录
 
@@ -291,7 +309,7 @@ AST(U/L)：
 
 ### 第四步：健康评估
 
-读取 `knowledge/triglycerides.md` 和 `knowledge/fatty-liver.md`。
+读取 `knowledge/triglycerides.md`、`knowledge/fatty-liver.md`、`knowledge/blood-sugar.md` 和 `knowledge/metabolic-syndrome.md`。
 
 基于用户数据输出：
 
@@ -342,6 +360,17 @@ BMI 分级标准（中国）：
 - **中风险**：甘油三酯升高 + 超重/肥胖，或合并 1-2 项其他指标异常
 - **高风险**：甘油三酯显著升高 + 多项指标异常 + 脂肪肝中重度
 
+**5.2b 代谢综合征评估：**
+
+如果用户提供了 ≥ 3 项以下数据，需进行代谢综合征综合评估（参考 `knowledge/metabolic-syndrome.md`）：
+- 腰围（如未提供，可用 BMI ≥ 28 推断中心性肥胖可能）
+- TG（已有）
+- HDL-C（已有）
+- 血压（如已提供）
+- 空腹血糖（如已提供）
+
+在风险评估中注明「符合/不符合代谢综合征诊断」，并列出符合的项数。
+
 **5.3 核心建议：**
 
 列出 3-5 条最关键的改善建议，按优先级排列。建议必须具体、可操作。
@@ -352,7 +381,7 @@ BMI 分级标准（中国）：
 
 ### 第五步：4 周减脂计划生成
 
-读取 `knowledge/nutrition-guide.md`、`knowledge/exercise-guide.md`、`knowledge/food-scoring.md` 和 `knowledge/lifestyle.md`。
+读取 `knowledge/nutrition-guide.md`、`knowledge/exercise-guide.md`、`knowledge/food-scoring.md`、`knowledge/lifestyle.md`、`knowledge/eating-out.md` 和 `knowledge/cooking-guide.md`。
 
 首先计算用户的：
 - BMR（使用 Mifflin-St Jeor 公式）
@@ -430,6 +459,8 @@ BMI 分级标准（中国）：
 
 用户选择「报告进展」时执行此步骤。
 
+读取 `knowledge/plateau.md`、`knowledge/behavioral-support.md` 和 `knowledge/body-composition.md`。
+
 1. 展示用户当前档案中的基本信息和上次记录
 2. 使用 AskUserQuestion 工具收集新数据：
 
@@ -449,11 +480,11 @@ BMI 分级标准（中国）：
    - 区分「水重」和「脂重」（参考 `knowledge/nutrition-guide.md` 中的「渗透压与水潴留」章节）：
      - 短期（1-3 天）波动超过 1 kg → 大概率是水分变化
      - 持续缓慢下降（每周 0.3-0.8 kg）→ 真实脂肪减少
-     - 持续 2 周以上平台不动 → 分析可能原因
+     - 持续 2 周以上平台不动 → 参考 `knowledge/plateau.md` 分析原因并给出突破建议
 
-   **3.2 正向鼓励（无论体重变化方向）：**
+   **3.2 正向鼓励（参考 `knowledge/behavioral-support.md` 中的鼓励话术）：**
    - 体重下降 → 表扬坚持和进步
-   - 体重不变 → 强调非体重维度的进步（运动能力、精神状态、饮食习惯）
+   - 体重不变 → 强调非体重维度的进步（参考 `knowledge/body-composition.md` 中的多维指标）
    - 体重上升 → 首先排除水重因素，鼓励继续坚持，解释短期波动的正常性
    - 列举非体重维度的进步：运动天数增加、饮食评分执行改善、主观精神状态
 

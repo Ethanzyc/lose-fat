@@ -25,11 +25,13 @@ def _find_project_root():
 
 PROJECT_ROOT = _find_project_root()
 DEFAULT_PROFILES = os.path.join(PROJECT_ROOT, '.lose-fat', 'profiles')
+DEFAULT_OUTPUT = os.path.join(PROJECT_ROOT, '.lose-fat', 'output')
 DASHBOARD = os.path.join(SCRIPT_DIR, 'dashboard.html')
 
 
 class Handler(SimpleHTTPRequestHandler):
     profiles_dir = DEFAULT_PROFILES
+    output_dir = DEFAULT_OUTPUT
 
     def do_GET(self):
         route = self.path.split('?')[0]
@@ -39,6 +41,8 @@ class Handler(SimpleHTTPRequestHandler):
             self._profiles()
         elif route.startswith('/api/profile/'):
             self._profile(route.split('/api/profile/', 1)[1])
+        elif route == '/api/plan':
+            self._plan()
         else:
             self.send_error(404)
 
@@ -89,6 +93,25 @@ class Handler(SimpleHTTPRequestHandler):
         try:
             with open(path, encoding='utf-8') as f:
                 self._json_resp(json.load(f))
+        except Exception:
+            self.send_error(500)
+
+    def _plan(self):
+        name = self.path.split('?', 1)[0]
+        qs = self.path.split('?', 1)[1] if '?' in self.path else ''
+        from urllib.parse import parse_qs
+        params = parse_qs(qs)
+        filename = params.get('file', [None])[0]
+        if not filename or not os.path.isdir(self.output_dir):
+            self._json_resp({'content': ''})
+            return
+        path = os.path.join(self.output_dir, filename)
+        if not os.path.isfile(path):
+            self._json_resp({'content': ''})
+            return
+        try:
+            with open(path, encoding='utf-8') as f:
+                self._json_resp({'content': f.read()})
         except Exception:
             self.send_error(500)
 

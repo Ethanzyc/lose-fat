@@ -73,7 +73,7 @@ header select{padding:10px 16px;border-radius:12px;border:none;font-size:14px;mi
     <div class="cards" id="cards"></div>
     <div id="rangeBar" class="range-bar" style="display:none"></div>
     <div id="charts"></div>
-    <div class="section" id="planSec" style="display:none"><h2>最新方案</h2><div class="md" id="planMd"></div></div>
+    <div class="section" id="planSec" style="display:none"><div class="md" id="planMd"></div></div>
   </div>
   <div id="empty" class="empty" style="display:none">
     <div>暂无用户档案</div>
@@ -243,11 +243,38 @@ header select{padding:10px 16px;border-radius:12px;border:none;font-size:14px;mi
       document.getElementById('planMd').innerHTML='<p style="color:#8E8E93">Markdown 渲染库未加载，方案内容无法显示</p>';
       return;
     }
-    sec.style.display='';
-    var html='';
-    if(p.latest_assessment)html+='<h3>健康评估</h3>'+marked.parse(p.latest_assessment);
-    html+='<h3>减脂计划</h3>'+marked.parse(plan);
-    document.getElementById('planMd').innerHTML=html;
+    var name=p.name||'';
+    var date=p.created_at?p.created_at.slice(0,10):'';
+    var fname=name&&date?(name+'_'+date+'_减脂方案.md'):'';
+    if(fname){
+      fetch('/api/plan?file='+encodeURIComponent(fname),{cache:'no-store'}).then(function(r){
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        return r.json();
+      }).then(function(d){
+        if(d.content){
+          sec.style.display='';
+          document.getElementById('planMd').innerHTML=marked.parse(d.content);
+        }else{
+          sec.style.display='';
+          var html='';
+          if(p.latest_assessment)html+='<h3>健康评估</h3>'+marked.parse(p.latest_assessment);
+          html+='<h3>减脂计划</h3>'+marked.parse(plan);
+          document.getElementById('planMd').innerHTML=html;
+        }
+      }).catch(function(){
+        sec.style.display='';
+        var html='';
+        if(p.latest_assessment)html+='<h3>健康评估</h3>'+marked.parse(p.latest_assessment);
+        html+='<h3>减脂计划</h3>'+marked.parse(plan);
+        document.getElementById('planMd').innerHTML=html;
+      });
+    }else{
+      sec.style.display='';
+      var html='';
+      if(p.latest_assessment)html+='<h3>健康评估</h3>'+marked.parse(p.latest_assessment);
+      html+='<h3>减脂计划</h3>'+marked.parse(plan);
+      document.getElementById('planMd').innerHTML=html;
+    }
   }
 
   function loadProfile(fn){
