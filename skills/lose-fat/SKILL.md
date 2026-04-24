@@ -44,6 +44,7 @@ triggers:
 - `knowledge/body-composition.md` — 腰围、体脂率、腰臀比标准与跟踪方法
 - `knowledge/cooking-guide.md` — 中式低油烹饪技法、调味替代、备菜技巧
 - `knowledge/food-label-reading.md` — 营养成分表解读、配料表识读、0糖0脂陷阱、低GI判断、30秒选品法
+- `knowledge/metabolism-basics.md` — TDEE 组成、BMR 影响因素、能量平衡动态模型、饥荒模式真相、肌肉与代谢、肠道菌群、睡眠与代谢、压力与皮质醇
 
 根据用户当前所处的阶段，选择性读取相关知识文件，不需要一次全部读取。
 
