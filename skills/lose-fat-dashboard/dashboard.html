@@ -117,7 +117,7 @@ header select{padding:8px 12px;border-radius:8px;border:none;font-size:14px;min-
   }
 
   function loadProfile(fn){
-    fetch('/api/profile/'+fn).then(function(r){return r.json()}).then(function(p){
+    fetch('/api/profile/'+fn,{cache:'no-store'}).then(function(r){return r.json()}).then(function(p){
       document.getElementById('content').style.display='';
       document.getElementById('empty').style.display='none';
       document.title='减脂数据 - '+p.name;
@@ -128,7 +128,7 @@ header select{padding:8px 12px;border-radius:8px;border:none;font-size:14px;min-
   }
 
   function init(){
-    fetch('/api/profiles').then(function(r){return r.json()}).then(function(list){
+    fetch('/api/profiles',{cache:'no-store'}).then(function(r){return r.json()}).then(function(list){
       if(!list.length){
         document.getElementById('empty').style.display='';
         sel.style.display='none';
