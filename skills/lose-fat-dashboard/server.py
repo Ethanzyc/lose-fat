@@ -48,6 +48,7 @@ class Handler(SimpleHTTPRequestHandler):
             return
         self.send_response(200)
         self.send_header('Content-Type', f'{ctype}; charset=utf-8')
+        self.send_header('Cache-Control', 'no-cache, no-store')
         self.end_headers()
         with open(path, 'rb') as f:
             self.wfile.write(f.read())
