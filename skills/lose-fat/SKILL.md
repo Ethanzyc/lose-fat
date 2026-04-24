@@ -43,6 +43,7 @@ triggers:
 - `knowledge/plateau.md` — 平台期识别、成因分析、突破策略
 - `knowledge/body-composition.md` — 腰围、体脂率、腰臀比标准与跟踪方法
 - `knowledge/cooking-guide.md` — 中式低油烹饪技法、调味替代、备菜技巧
+- `knowledge/food-label-reading.md` — 营养成分表解读、配料表识读、0糖0脂陷阱、低GI判断、30秒选品法
 
 根据用户当前所处的阶段，选择性读取相关知识文件，不需要一次全部读取。
 
