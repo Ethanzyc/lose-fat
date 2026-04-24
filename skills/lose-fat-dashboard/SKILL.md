@@ -54,7 +54,8 @@ triggers:
 2. 如果已在运行 → 告知用户访问地址 `http://localhost:8642`，并询问是否需要重启
 3. 如果未运行：
    - 检查端口是否被占用：`lsof -i :8642`
-   - 启动服务：`nohup python3 server.py > /dev/null 2>&1 & echo $!`
+   - 启动服务：`nohup python3 <SKILL.md所在目录>/server.py > /dev/null 2>&1 & echo $!`
+     注意：使用 server.py 的绝对路径，避免工作目录导致路径计算错误
    - 将 PID 写入 `.lose-fat/server.pid`
    - 自动打开浏览器：`open http://localhost:8642`（macOS）或根据系统选择命令
    - 告知用户：「仪表盘已启动，访问 http://localhost:8642 。停止服务请使用 /dashboard 然后选择「停止服务」。」

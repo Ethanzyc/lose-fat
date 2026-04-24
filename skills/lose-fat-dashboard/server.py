@@ -7,7 +7,23 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 PORT = 8642
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+
+
+def _find_project_root():
+    """Walk up from script dir to find the directory containing .lose-fat/."""
+    d = SCRIPT_DIR
+    for _ in range(10):
+        if os.path.isdir(os.path.join(d, '.lose-fat')):
+            return d
+        parent = os.path.dirname(d)
+        if parent == d:
+            break
+        d = parent
+    # Fallback: assume skill is at skills/<name>/ or .claude/skills/<name>/
+    return os.path.dirname(os.path.dirname(SCRIPT_DIR))
+
+
+PROJECT_ROOT = _find_project_root()
 DEFAULT_PROFILES = os.path.join(PROJECT_ROOT, '.lose-fat', 'profiles')
 DASHBOARD = os.path.join(SCRIPT_DIR, 'dashboard.html')
 
@@ -89,6 +105,7 @@ def main():
     server = HTTPServer(('127.0.0.1', args.port), Handler)
     url = f'http://localhost:{args.port}'
     print(f'Dashboard running at {url}')
+    print(f'Profiles dir: {Handler.profiles_dir}')
     try:
         server.serve_forever()
     except KeyboardInterrupt:
