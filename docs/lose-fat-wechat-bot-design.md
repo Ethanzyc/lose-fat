@@ -141,33 +141,64 @@
 
 > **MVP 阶段可以先用固定 prompt**（按场景加载对应知识文件），RAG 作为后续优化。
 
-#### 4. 数据存储（SQLite）
+#### 4. 数据存储（MySQL）
 
-单文件数据库，零运维，适合小规模场景。
+已有现成的 MySQL 实例，直接复用，无需额外部署。
 
 **核心表：**
 
 ```sql
 -- 用户档案
 users (
-  id, name, age, gender, height_cm, weight_kg, bmi,
-  target_weight_kg,
-  health_data TEXT,  -- JSON: tg, tc, hdl, ldl, alt, ast, liver_ultrasound, fasting_glucose
-  exercise_prefs TEXT,  -- JSON: weekly_days, session_duration, experience, preferred_types
-  created_at, updated_at
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(50),
+  age INT,
+  gender ENUM('male', 'female'),
+  height_cm DECIMAL(5,1),
+  weight_kg DECIMAL(5,1),
+  bmi DECIMAL(4,1),
+  target_weight_kg DECIMAL(5,1),
+  health_data JSON,      -- tg, tc, hdl, ldl, alt, ast, liver_ultrasound, fasting_glucose
+  exercise_prefs JSON,   -- weekly_days, session_duration, experience, preferred_types
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 
 -- 体重历史
-weight_records (id, user_id, weight_kg, recorded_at)
+weight_records (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  weight_kg DECIMAL(5,1) NOT NULL,
+  recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_user_time (user_id, recorded_at)
+)
 
 -- 体检历史
-checkup_records (id, user_id, data TEXT, recorded_at)  -- JSON: 各项指标
+checkup_records (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  data JSON,              -- 各项指标
+  recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)
 
 -- 会话状态（跟踪用户处于哪个流程步骤）
-session_states (id, user_id, state, context TEXT, updated_at)
+session_states (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL UNIQUE,
+  state VARCHAR(50),      -- e.g. 'awaiting_age', 'awaiting_weight', 'idle'
+  context JSON,            -- 当前步骤的临时数据
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)
 
 -- 生成的方案
-plans (id, user_id, cycle_number, content TEXT, created_at)
+plans (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  cycle_number INT,
+  content TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_user_cycle (user_id, cycle_number)
+)
 ```
 
 ## 从现有 skill 迁移的内容
@@ -207,7 +238,7 @@ User Prompt：
 ├── 微信客户端（登录机器人微信号）
 ├── WeChatFerry（Python 进程）
 ├── 后端服务（FastAPI 进程）
-└── SQLite 数据文件
+└── MySQL（已有实例，新建库即可）
 ```
 
 | 方案 | 配置 | 月费 |
@@ -223,7 +254,7 @@ lose-fat-bot/
 ├── README.md
 ├── requirements.txt
 ├── config/
-│   ├── settings.py          # 配置（API key、端口等）
+│   ├── settings.py          # 配置（API key、数据库连接、端口等）
 │   └── prompts/             # system prompt 模板
 │       ├── assessment.md
 │       ├── plan.md
@@ -245,12 +276,10 @@ lose-fat-bot/
 │   │   ├── knowledge_service.py
 │   │   └── plan_service.py
 │   ├── models/
-│   │   └── database.py      # SQLite 表定义和操作
+│   │   └── database.py      # MySQL 表定义和操作
 │   └── utils/
 │       ├── calculator.py    # BMI、TDEE 等计算
 │       └── formatter.py     # 消息格式化（分段、表情等）
-├── data/
-│   └── lose_fat.db          # SQLite 数据文件（gitignore）
 └── tests/
 ```
 
