@@ -72,6 +72,27 @@ triggers:
 
 此规则在任意步骤中均生效，不需要进入正式的「进度回访」流程。
 
+## 全局规则：饮食自动记录
+
+用户在对话中提到饮食内容时（如「中午吃了碗牛肉面」「昨晚吃了火锅」），自动执行：
+
+1. 确认当前用户档案（同体重记录规则）
+2. 将饮食数据追加到档案的 `diet_records` 数组中，格式：
+   ```json
+   {
+     "date": "YYYY-MM-DD",
+     "meal_type": "breakfast|lunch|dinner|snack",
+     "raw_text": "用户的原始描述",
+     "tags": ["标签1", "标签2"],
+     "score": 数字（基于食物评分系统估算，null 表示无法评估）
+   }
+   ```
+3. 常用标签：`high_carb`、`high_fat`、`high_sodium`、`high_sugar`、`high_protein`、`eating_out`、`cheat_meal`、`no_vegetable`、`late_night`、`snack`、`balanced`
+4. 保存档案 JSON 文件
+5. 给出即时反馈（1-2 句评分或建议），**不需要展示 tags 和 score**
+
+此规则在任意步骤中均生效，不需要进入正式的「进度回访」流程。
+
 ## 流程
 
 ### 第一步：用户识别
@@ -274,6 +295,7 @@ AST(U/L)：
     {"date": "2025-10", "tg_mmol": 3.8, "alt_u_l": 52},
     {"date": "2026-04-23", "tg_mmol": 3.2, "alt_u_l": 45}
   ],
+  "diet_records": [],
   "exercise_preferences": {
     "weekly_days": "4-5天",
     "session_duration": "30-40分钟",
@@ -532,8 +554,13 @@ BMI 分级标准（中国）：
      - 持续缓慢下降（每周 0.3-0.8 kg）→ 真实脂肪减少
      - 持续 2 周以上平台不动 → 参考 `knowledge/plateau.md` 分析原因并给出突破建议
 
-   **3.2 正向鼓励（参考 `knowledge/behavioral-support.md` 中的鼓励话术）：**
-   - 体重下降 → 表扬坚持和进步
+   **3.2 饮食模式分析（如果档案中有 `diet_records`）：**
+   - 统计近期（过去 1-2 周）的饮食标签分布，识别高频问题模式
+   - 例如：频繁外食（`eating_out` 占比 > 50%）、碳水偏高（`high_carb` 频繁）、缺乏蔬菜（`no_vegetable` 频繁）
+   - 将分析结果融入下方的鼓励和建议中，**不逐条展示原始记录**
+   - 如果饮食记录不足（< 3 条），不做分析
+
+   **3.3 正向鼓励（参考 `knowledge/behavioral-support.md` 中的鼓励话术）：**   - 体重下降 → 表扬坚持和进步
    - 体重不变 → 强调非体重维度的进步（参考 `knowledge/body-composition.md` 中的多维指标）
    - 体重上升 → 首先排除水重因素，鼓励继续坚持，解释短期波动的正常性
    - 列举非体重维度的进步：运动天数增加、饮食评分执行改善、主观精神状态

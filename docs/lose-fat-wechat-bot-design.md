@@ -84,7 +84,7 @@
                                               │              │
                                         ┌─────┴─────┐ ┌─────┴─────┐
                                         │ 大模型 API │ │  数据存储   │
-                                        │ (DeepSeek) │ │  (SQLite)  │
+                                        │ (DeepSeek) │ │  (MySQL)   │
                                         └───────────┘ └───────────┘
 ```
 
@@ -190,6 +190,19 @@ session_states (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 
+-- 饮食记录（用户提到饮食时自动存储，不展示给用户，用于分析和诊断）
+diet_records (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  meal_type ENUM('breakfast', 'lunch', 'dinner', 'snack'),
+  raw_text TEXT NOT NULL,   -- 用户原始描述
+  tags JSON,                -- 结构化标签，如 ["high_carb", "eating_out", "no_vegetable"]
+  score INT,                -- 基于食物评分系统估算（null 表示无法评估）
+  recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_user_time (user_id, recorded_at),
+  INDEX idx_user_tags ((CAST(tags AS CHAR(255))))  -- 用于按标签聚合分析
+)
+
 -- 生成的方案
 plans (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -209,7 +222,7 @@ plans (
 | SKILL.md 中的流程逻辑 | 转化为后端服务的 Python 代码 |
 | TDEE/BMI 计算公式 | 提取为独立工具函数 |
 | 食物评分系统 | 保留在 food-scoring.md，由大模型读取并执行 |
-| 用户档案 JSON 结构 | 转化为 SQLite 表结构 |
+| 用户档案 JSON 结构 | 转化为 MySQL 表结构 |
 | Dashboard 可视化 | MVP 不迁移，后续可选 |
 
 ## Prompt 设计要点
