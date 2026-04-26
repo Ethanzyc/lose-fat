@@ -1,2 +1,8 @@
 # User data directory (profiles, output, etc.)
 .lose-fat/
+
+# macOS
+.DS_Store
+
+# Superpowers plugin artifacts
+docs/superpowers/
