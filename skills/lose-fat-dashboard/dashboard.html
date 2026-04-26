@@ -118,9 +118,7 @@ header select{padding:10px 16px;border-radius:12px;border:none;font-size:14px;mi
       b.onclick=function(){
         currentRange=r.k;customStart='';customEnd='';
         renderRangeBar();
-        if(currentProfile&&typeof Chart!=='undefined'){
-          try{renderCharts(currentProfile)}catch(e){console.error('renderCharts:',e)}
-        }
+        refreshView();
       };
       bar.appendChild(b);
     });
@@ -128,18 +126,14 @@ header select{padding:10px 16px;border-radius:12px;border:none;font-size:14px;mi
     var ds=document.createElement('input');ds.type='date';ds.className='date-in';ds.value=customStart;
     ds.onchange=function(){
       customStart=ds.value;
-      if(customStart||customEnd){currentRange='custom';renderRangeBar();
-        if(currentProfile&&typeof Chart!=='undefined'){try{renderCharts(currentProfile)}catch(e){console.error('renderCharts:',e)}}
-      }
+      if(customStart||customEnd){currentRange='custom';renderRangeBar();refreshView();}
     };
     bar.appendChild(ds);
     var lbl=document.createElement('span');lbl.className='date-label';lbl.textContent=' 至 ';bar.appendChild(lbl);
     var de=document.createElement('input');de.type='date';de.className='date-in';de.value=customEnd;
     de.onchange=function(){
       customEnd=de.value;
-      if(customStart||customEnd){currentRange='custom';renderRangeBar();
-        if(currentProfile&&typeof Chart!=='undefined'){try{renderCharts(currentProfile)}catch(e){console.error('renderCharts:',e)}}
-      }
+      if(customStart||customEnd){currentRange='custom';renderRangeBar();refreshView();}
     };
     bar.appendChild(de);
     if(currentRange==='custom'){
@@ -177,23 +171,32 @@ header select{padding:10px 16px;border-radius:12px;border:none;font-size:14px;mi
 
   function onScriptsReady(){
     if(scriptsPending>0||!currentProfile)return;
-    try{renderCharts(currentProfile)}catch(e){console.error('renderCharts:',e)}
+    refreshView();
     try{renderPlan(currentProfile)}catch(e){console.error('renderPlan:',e)}
   }
 
   function bmiS(v){return v<18.5?['偏瘦','green','bg']:v<24?['正常','green','bg']:v<28?['超重','amber','ba']:['肥胖','red','br']}
   function tgS(v){return v<1.7?['正常','green','bg']:v<2.3?['边缘升高','amber','ba']:['升高','red','br']}
 
-  function renderCards(p){
+  function renderCards(p,filteredWh){
     var h=p.health_data||{},b=bmiS(p.bmi),t=tgS(h.tg_mmol);
-    var wh=p.weight_history||[],s=wh.length?wh[0].weight_kg:p.weight_kg;
-    var d=p.weight_kg-s,dt=d?((d<0?'↓ ':'↑ ')+Math.abs(d).toFixed(1)+' kg'):'起始体重';
+    var wh=filteredWh||(p.weight_history||[]);
+    var cur=p.weight_kg,s=wh.length?wh[0].weight_kg:cur;
+    var d=cur-s,dt=d?((d<0?'↓ ':'↑ ')+Math.abs(d).toFixed(1)+' kg'):(wh.length?'持平':'起始体重');
+    var meta=wh.length>1?'较区间起始 '+s+' kg':(wh.length===1?'当前记录':'暂无记录');
     document.getElementById('cards').innerHTML=
       '<div class="card"><div class="label">BMI</div><div class="value '+b[1]+'">'+p.bmi.toFixed(1)+'</div><div class="meta"><span class="badge '+b[2]+'">'+b[0]+'</span></div></div>'+
       '<div class="card"><div class="label">甘油三酯</div><div class="value '+t[1]+'">'+h.tg_mmol+'</div><div class="meta">mmol/L · <span class="badge '+t[2]+'">'+t[0]+'</span></div></div>'+
       '<div class="card"><div class="label">当前体重</div><div class="value">'+p.weight_kg+' kg</div><div class="meta">'+(p.target_weight_kg?'目标 '+p.target_weight_kg+' kg':'')+'</div></div>'+
-      '<div class="card"><div class="label">体重变化</div><div class="value '+(d<0?'green':d>0?'red':'')+'">'+dt+'</div><div class="meta">较起始 '+s+' kg</div></div>';
+      '<div class="card"><div class="label">体重变化</div><div class="value '+(d<0?'green':d>0?'red':'')+'">'+dt+'</div><div class="meta">'+meta+'</div></div>';
     showStatus('');
+  }
+
+  function refreshView(){
+    if(!currentProfile||typeof Chart==='undefined')return;
+    var fwh=filterByRange(currentProfile.weight_history||[],currentRange);
+    renderCards(currentProfile,fwh);
+    renderCharts(currentProfile);
   }
 
   function renderCharts(p){
