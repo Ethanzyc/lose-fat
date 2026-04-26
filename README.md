@@ -31,7 +31,7 @@
 ### 前置条件
 
 - 已安装 [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)
-- 有一个可用的 Claude 账号（需要支持 Claude Code 的订阅）
+- 有一个可用的 Claude 账号（Max 套餐 / Teams 套餐 / 国内合规模板均可）
 
 ### 安装方式
 
