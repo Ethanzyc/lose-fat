@@ -6,3 +6,6 @@
 
 # Superpowers plugin artifacts
 docs/superpowers/
+
+# Design docs (keep local only)
+docs/
